@@ -2,6 +2,8 @@ var express = require('express');
 var jwt = require('jsonwebtoken');
 var request = require('request');
 var router = express.Router();
+const sha256 = require('sha256');
+
 require('dotenv/config')
 
 router.post('/user/add', function (req, res, next) {
@@ -10,7 +12,7 @@ router.post('/user/add', function (req, res, next) {
   var collection = req.db.collection("users");
   var dataToInsert = {
     username: username,
-    password: password
+    password: sha256(password)
   };
   collection.insertOne(dataToInsert).then(function (data) {
     if (data) {
@@ -31,7 +33,7 @@ router.get('/user/login', function (req, res, next) {
   var username = req.query.username;
   var password = req.query.password;
   var collection = req.db.collection("users");
-  collection.findOne({ username: username, password: password }).then(function (data) {
+  collection.findOne({ username: username, password: sha256(password) }).then(function (data) {
     if (data) {
       res.send({
         status: "Success",
